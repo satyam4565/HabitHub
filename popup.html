@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HabitHub</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <script src="lib/chart.js"></script>
+  <script src="lib/luxon.min.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>HabitHub</h1>
+      <nav>
+        <ul>
+          <li id="dashboard-tab" class="tab active">Dashboard</li>
+          <li id="habits-tab" class="tab">Activity</li>
+          <li id="goals-tab" class="tab">Goals</li>
+          <li id="settings-tab" class="tab">Settings</li>
+        </ul>
+      </nav>
+    </header>
+    <main>
+      <section id="dashboard-content" class="tab-content active">
+        <div class="section-header">
+          <h2>Dashboard</h2>
+          <button id="refresh-btn" class="btn btn-refresh"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+        <div id="alert-container">
+          <!-- Alerts will be added dynamically -->
+        </div>
+        
+        <div class="summary-cards">
+          <div class="card">
+            <h3>Today's Progress</h3>
+            <div class="progress-container">
+              <div class="progress-bar"></div>
+            </div>
+            <span id="progress-today">0%</span>
+          </div>
+          <div class="card">
+            <h3>Time Tracked Today</h3>
+            <div class="time-counter" id="time-today">0 min</div>
+          </div>
+        </div>
+        
+        <div class="charts-container">
+          <div class="chart-card" id="category-chart-container">
+            <h3>Time per Category</h3>
+            <div class="chart-container">
+              <canvas id="category-chart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card" id="weekly-chart-container">
+            <h3>Weekly Activity</h3>
+            <div class="chart-container">
+              <canvas id="weekly-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Habits Tab -->
+      <section id="habits-content" class="tab-content">
+        <div class="section-header">
+          <h2>Your Browsing Habits</h2>
+        </div>
+        
+        <div id="habits-list" class="habits-list">
+          <!-- Habits will be added dynamically -->
+        </div>
+      </section>
+      
+      <!-- Goals Tab -->
+      <section id="goals-content" class="tab-content">
+        <div class="section-header">
+          <h2>Your Goals</h2>
+          <button id="add-goal-btn" class="btn btn-primary" onclick="document.getElementById('goal-form').classList.add('visible')"><i class="fas fa-plus"></i> Add Goal</button>
+        </div>
+        
+        <div id="empty-goals-message" class="empty-message">
+          <p>You don't have any goals yet.</p>
+          <p>Click "Add Goal" to create your first goal.</p>
+        </div>
+        
+        <div id="goals-container" class="goals-list">
+          <!-- Goals will be added dynamically -->
+        </div>
+        
+        <div id="goal-form" class="form-modal">
+          <div class="form-container">
+            <h3>Add New Goal</h3>
+            <form>
+              <div class="form-group">
+                <label for="goal-website">Website Domain</label>
+                <input type="text" id="goal-website" placeholder="e.g., facebook.com" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="goal-type">Goal Type</label>
+                <select id="goal-type" required>
+                  <option value="time">Time Limit</option>
+                  <option value="visits">Visit Limit</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="goal-limit">Daily Limit</label>
+                <input type="number" id="goal-limit" min="1" value="30" required>
+                <span id="goal-unit">minutes</span>
+              </div>
+              
+              <div class="form-actions">
+                <button type="button" id="goal-form-cancel" class="btn btn-secondary" onclick="document.getElementById('goal-form').classList.remove('visible')">Cancel</button>
+                <button type="button" id="goal-form-submit" class="btn btn-primary">Save Goal</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Settings Tab -->
+      <section id="settings-content" class="tab-content">
+        <div class="section-header">
+          <h2>Settings</h2>
+        </div>
+        
+        <div class="settings-group">
+          <h3>Notifications</h3>
+          
+          <div class="setting-item">
+            <div class="setting-label">
+              <label for="notifications-toggle">Enable Notifications</label>
+              <p class="setting-description">Receive alerts when you reach your goals or need to take a break</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" id="notifications-toggle" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="setting-item">
+            <div class="setting-label">
+              <label for="notification-frequency">Notification Frequency</label>
+              <p class="setting-description">How often to check and send notifications</p>
+            </div>
+            <div class="setting-control">
+              <select id="notification-frequency">
+                <option value="5">Every 5 minutes</option>
+                <option value="15" selected>Every 15 minutes</option>
+                <option value="30">Every 30 minutes</option>
+                <option value="60">Every hour</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <div class="settings-group">
+          <h3>Data Management</h3>
+          
+          <div class="setting-item">
+            <div class="setting-label">
+              <label for="data-retention">Data Retention</label>
+              <p class="setting-description">How long to keep your browsing history</p>
+            </div>
+            <div class="setting-control">
+              <select id="data-retention">
+                <option value="7">7 days</option>
+                <option value="30" selected>30 days</option>
+                <option value="90">90 days</option>
+                <option value="180">180 days</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="setting-item">
+            <div class="setting-label">
+              <label>Clear Browsing Data</label>
+              <p class="setting-description">Delete all tracked browsing history and statistics</p>
+            </div>
+            <div class="setting-control">
+              <button id="clear-data" class="btn btn-danger">Clear Data</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="settings-actions">
+          <button id="save-settings" class="btn btn-primary">Save Settings</button>
+        </div>
+      </section>
+    </main>
+    
+    <footer>
+      <p>HabitHub v1.0.0</p>
+    </footer>
+  </div>
+  
+  <!-- Loading overlay -->
+  <div id="loading-overlay">
+    <div class="loader"></div>
+    <p>Loading...</p>
+  </div>
+  
+  <!-- Load Remaining Extension Scripts -->
+  <script src="js/charts.js"></script>
+  <script src="js/popup.js"></script>
+</body>
+</html> 
